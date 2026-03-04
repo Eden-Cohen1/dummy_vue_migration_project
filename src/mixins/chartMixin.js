@@ -49,7 +49,6 @@ export default {
     },
 
     updateChart() {
-      this.prepareChartData(this.chartData || [])
       this.isChartReady = true
       this.$nextTick(() => {
         // Chart DOM updated
