@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create vite@latest . -- --template vue)",
+      "Bash(npx --yes create-vite . --template vue)",
+      "Bash(npm init -y)",
+      "Bash(npm install vue@latest vue-router@4 pinia@latest)",
+      "Bash(npm install -D vite@latest @vitejs/plugin-vue tailwindcss @tailwindcss/vite)",
+      "Bash(npx vite build)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\eden7\\.git"
+    ]
+  }
+}
