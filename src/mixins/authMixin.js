@@ -1,3 +1,6 @@
+import { useAuthStore } from '@/stores/auth'
+import { api } from '@/services/api'
+
 export default {
   data() {
     return {
@@ -25,10 +28,14 @@ export default {
   },
 
   methods: {
-    login(credentials) {
+    async login(credentials) {
       try {
         this.loginAttempts++
-        this.user = credentials
+
+        const authStore = useAuthStore()
+        await authStore.login(credentials)
+
+        this.user = authStore.user
         this.isAuthenticated = true
         this.authError = null
         this.$emit('auth-changed')
@@ -38,6 +45,9 @@ export default {
     },
 
     logout() {
+      const authStore = useAuthStore()
+      authStore.logout()
+
       this.user = null
       this.isAuthenticated = false
       this.authError = null
@@ -45,8 +55,11 @@ export default {
     },
 
     checkAuth() {
-      const token = localStorage.getItem('token')
-      if (token) {
+      const authStore = useAuthStore()
+      authStore.checkSession()
+
+      if (authStore.isAuthenticated) {
+        this.user = authStore.user
         this.isAuthenticated = true
       }
     },

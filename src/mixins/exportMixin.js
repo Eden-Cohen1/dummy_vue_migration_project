@@ -1,3 +1,6 @@
+import { useSettingsStore } from '@/stores/settings'
+import { formatDate, formatDateTime } from '@/utils/helpers'
+
 export default {
   data() {
     return {
@@ -14,7 +17,10 @@ export default {
     },
 
     exportFileName() {
-      return 'export_' + Date.now() + '.' + this.exportFormat
+      const settingsStore = useSettingsStore()
+      const lang = settingsStore.settings.language || 'en'
+      const dateStr = formatDate(new Date())
+      return 'export_' + lang + '_' + dateStr.replace(/[\s,]/g, '-') + '.' + this.exportFormat
     }
   },
 
@@ -23,14 +29,21 @@ export default {
       this.isExporting = true
       this.exportProgress = 0
 
+      const settingsStore = useSettingsStore()
+      const maxRows = settingsStore.settings.pageSize || 1000
+      const exportData = data.slice(0, maxRows)
       const columns = this.exportColumns.length > 0
         ? this.exportColumns
-        : Object.keys(data[0] || {})
+        : Object.keys(exportData[0] || {})
 
       const header = columns.join(',')
-      const rows = data.map(row => {
+      const rows = exportData.map(row => {
         return columns.map(col => {
-          const value = row[col]
+          let value = row[col]
+          // Format date columns using helper
+          if (value instanceof Date || (typeof value === 'string' && !isNaN(Date.parse(value)) && col.toLowerCase().includes('date'))) {
+            value = formatDateTime(value)
+          }
           if (typeof value === 'string' && value.includes(',')) {
             return '"' + value + '"'
           }

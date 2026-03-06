@@ -1,3 +1,7 @@
+import { useTasksStore } from '@/stores/tasks'
+import { api } from '@/services/api'
+import { generateId, timeAgo } from '@/utils/helpers'
+
 export default {
   data() {
     return {
@@ -21,22 +25,34 @@ export default {
 
     hasComments() {
       return this.comments.length > 0
+    },
+
+    formattedComments() {
+      return this.sortedComments.map(c => ({
+        ...c,
+        timeLabel: timeAgo(c.createdAt)
+      }))
     }
   },
 
   methods: {
-    addComment() {
+    async addComment() {
       if (!this.newComment.trim()) return
 
       const comment = {
-        id: Date.now(),
+        id: generateId(),
         text: this.newComment,
         createdAt: new Date().toISOString(),
         author: 'currentUser',
         parentId: null
       }
 
-      this.comments.unshift(comment)
+      const saved = await api.addComment({
+        ...comment,
+        taskId: this.entityId
+      })
+
+      this.comments.unshift(saved)
       this.newComment = ''
 
       this.$refs.commentInput?.focus()
@@ -55,22 +71,29 @@ export default {
       }
     },
 
-    deleteComment(id) {
+    async deleteComment(id) {
+      await api.deleteComment(id)
       this.comments = this.comments.filter(c => c.id !== id)
     },
 
-    loadComments(entityId) {
+    async loadComments(entityId) {
       this.isLoadingComments = true
-      // Simulate API call to load comments
-      setTimeout(() => {
-        this.comments = []
+      const tasksStore = useTasksStore()
+      // Ensure task is loaded before fetching comments
+      if (!tasksStore.currentTask || tasksStore.currentTask.id !== entityId) {
+        await tasksStore.fetchTask(entityId)
+      }
+      try {
+        const data = await api.getComments(entityId)
+        this.comments = data
+      } finally {
         this.isLoadingComments = false
-      }, 500)
+      }
     },
 
     replyToComment(parentId, text) {
       const reply = {
-        id: Date.now(),
+        id: generateId(),
         text: text,
         createdAt: new Date().toISOString(),
         author: 'currentUser',

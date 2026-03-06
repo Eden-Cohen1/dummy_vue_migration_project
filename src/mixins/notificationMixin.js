@@ -1,3 +1,7 @@
+import { useNotificationsStore } from '@/stores/notifications'
+import { api } from '@/services/api'
+import { generateId, timeAgo } from '@/utils/helpers'
+
 export default {
   data() {
     return {
@@ -31,32 +35,50 @@ export default {
         groups[type].push(notification)
         return groups
       }, {})
+    },
+
+    formattedNotifications() {
+      return this.sortedNotifications.map(n => ({
+        ...n,
+        timeLabel: timeAgo(n.createdAt)
+      }))
     }
   },
 
   methods: {
     addNotification(n) {
-      this.notifications.unshift(n)
+      const notification = { ...n, id: n.id || generateId() }
+      this.notifications.unshift(notification)
       this.unreadCount++
+
+      const store = useNotificationsStore()
+      store.addNotification(notification)
+
       this.$emit('notification-added')
       this.$nextTick(() => {
         // DOM updated after notification added
       })
     },
 
-    markAsRead(id) {
+    async markAsRead(id) {
       const notification = this.notifications.find(n => n.id === id)
       if (notification && !notification.read) {
         notification.read = true
         this.unreadCount--
+
+        const store = useNotificationsStore()
+        await store.markRead(id)
       }
     },
 
-    markAllRead() {
+    async markAllRead() {
       this.notifications.forEach(n => {
         n.read = true
       })
       this.unreadCount = 0
+
+      const store = useNotificationsStore()
+      await store.markAllRead()
     },
 
     removeNotification(id) {
@@ -66,6 +88,12 @@ export default {
     clearAll() {
       this.notifications = []
       this.unreadCount = 0
+    },
+
+    async fetchNotifications(userId) {
+      const data = await api.getNotifications(userId)
+      this.notifications = data
+      this.unreadCount = data.filter(n => !n.read).length
     }
   },
 

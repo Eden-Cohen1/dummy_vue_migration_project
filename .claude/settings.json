@@ -6,7 +6,22 @@
       "Bash(npm init -y)",
       "Bash(npm install vue@latest vue-router@4 pinia@latest)",
       "Bash(npm install -D vite@latest @vitejs/plugin-vue tailwindcss @tailwindcss/vite)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(node -c src/composables/usePermission.js)",
+      "Bash(node -c src/composables/useTable.js)",
+      "Bash(node -c src/composables/usePagination.js)",
+      "Bash(node -c src/composables/useForm.js)",
+      "Bash(node -c src/composables/useSelection.js)",
+      "Read(//c/Users/eden7/AppData/Local/Temp/claude/c--Users-eden7-projects-dummy-vue-migration-project/tasks/**)",
+      "Bash(for f in src/views/SettingsView.vue src/components/common/StatusBadge.vue src/components/notifications/NotificationItem.vue src/components/tasks/TaskCard.vue src/views/NotFoundView.vue)",
+      "Bash(do if git diff --name-only)",
+      "Bash(do echo \"=== $f ===\")",
+      "Read(//c/Users/eden7/projects/dummy_vue_migration_project/**)",
+      "Read(//tmp/**)",
+      "Read(//c/tmp/**)",
+      "Bash(sed 's/Mixin//')",
+      "Bash(for f in src/components/projects/ProjectForm.vue src/components/projects/ProjectSettings.vue src/components/tasks/TaskForm.vue src/components/users/UserForm.vue)",
+      "Bash(done)"
     ],
     "additionalDirectories": [
       "C:\\Users\\eden7\\.git"

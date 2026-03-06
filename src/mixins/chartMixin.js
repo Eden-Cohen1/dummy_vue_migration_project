@@ -1,10 +1,15 @@
+import { useTasksStore } from '@/stores/tasks'
+import { useSettingsStore } from '@/stores/settings'
+import { debounce } from '@/utils/helpers'
+
 export default {
   data() {
     return {
       chartData: null,
       chartOptions: {},
       chartType: 'bar',
-      isChartReady: false
+      isChartReady: false,
+      _debouncedResize: null
     }
   },
 
@@ -23,6 +28,20 @@ export default {
     },
 
     chartColors() {
+      const settingsStore = useSettingsStore()
+      const isDark = settingsStore.theme === 'dark'
+      if (isDark) {
+        return [
+          '#66BB6A',
+          '#42A5F5',
+          '#FFA726',
+          '#EF5350',
+          '#AB47BC',
+          '#26C6DA',
+          '#FFEE58',
+          '#8D6E63'
+        ]
+      }
       return [
         '#4CAF50',
         '#2196F3',
@@ -46,6 +65,17 @@ export default {
         label: item.name || item.label,
         value: item.value || item.count || 0
       }))
+    },
+
+    async loadTaskChartData(projectId) {
+      const tasksStore = useTasksStore()
+      await tasksStore.fetchTasks(projectId)
+      const byStatus = tasksStore.tasksByStatus
+      const raw = Object.entries(byStatus).map(([status, tasks]) => ({
+        label: status,
+        value: tasks.length
+      }))
+      this.prepareChartData(raw)
     },
 
     updateChart() {
@@ -77,11 +107,16 @@ export default {
   },
 
   mounted() {
+    this._debouncedResize = debounce(this.resizeChart, 150)
+    window.addEventListener('resize', this._debouncedResize)
     this.resizeChart()
   },
 
   beforeUnmount() {
     this.isChartReady = false
+    if (this._debouncedResize) {
+      window.removeEventListener('resize', this._debouncedResize)
+    }
   },
 
   watch: {
