@@ -231,21 +231,26 @@
 </template>
 
 <script>
-import commentMixin from '@/mixins/commentMixin'
-import loadingMixin from '@/mixins/loadingMixin'
-import permissionMixin from '@/mixins/permissionMixin'
+import { usePermission } from '@/composables/usePermission'
+import { useLoading } from '@/composables/useLoading'
+import { useComment } from '@/composables/useComment'
 import { api } from '@/services/api'
 
 export default {
   name: 'TaskDetail',
-
-  mixins: [commentMixin, loadingMixin, permissionMixin],
 
   props: {
     taskId: {
       type: [String, Number],
       required: true
     }
+  },
+  setup() {
+    const { comments, newComment, isLoadingComments, commentCount, sortedComments, hasComments, addComment, deleteComment, loadComments } = useComment()
+    const { isLoading, loadingMessage, error, hasError, canRetry, startLoading, stopLoading, setError, retry } = useLoading()
+    const { canEdit, canDelete } = usePermission()
+
+    return { comments, newComment, isLoadingComments, commentCount, sortedComments, hasComments, addComment, deleteComment, loadComments, isLoading, loadingMessage, error, hasError, canRetry, startLoading, stopLoading, setError, retry, canEdit, canDelete }
   },
 
   data() {
